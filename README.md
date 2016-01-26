@@ -88,6 +88,8 @@ foo.has_request_body?
 #=> true
 foo.has_response_body?
 #=> true
+Clientele::HTTP::Verb.methods.include? :FOO
+#=> false
 
 bar = Clientele::HTTP::Verb.for :bar, request_body: false, response_body: false
 #=> #<Clientele::HTTP::Verb:0x7ff4e47a33d0 - BAR>
@@ -98,6 +100,8 @@ bar.method
 bar.has_request_body?
 #=> false
 bar.has_response_body?
+#=> false
+Clientele::HTTP::Verb.methods.include? :BAR
 #=> false
 ```
 
@@ -110,7 +114,7 @@ class Clientele::HTTP::Verb::Baz < Clientele::HTTP::Verb::Concrete
   @response_body = false
 end
 
-Clientele::HTTP::Verb.methods.include? :BAZ
+Clientele::HTTP::Verb.methods.include? 'baz'
 #=> true
 ```
 
@@ -160,6 +164,8 @@ custom.code
 #=> 299
 custom.description
 #=> "Non-standard HTTP Status"
+Clientele::HTTP::Status.codes.include? 299
+#=> false
 
 success = Clientele::HTTP::Status.for 299, description: "My custom Success status code"
 #=> #<Clientele::HTTP::Status:0x7fa5dac5e068 - 299: My custom Success status code>
@@ -169,6 +175,8 @@ success.code
 #=> 299
 success.description
 #=> "My custom Success status code"
+Clientele::HTTP::Status.codes.include? 299
+#=> false
 ```
 
 Custom concrete classes must be placed in the `Clientele::HTTP::Status` namespace and inherit from `Clientele::HTTP::Status::Concrete`:
@@ -179,7 +187,7 @@ class Clientele::HTTP::Status::Baz < Clientele::HTTP::Status::Concrete
   @description  = "Macaroon Authentication Required"
 end
 
-Clientele::HTTP::Status.codes.include? 299
+Clientele::HTTP::Status.codes.include? 499
 #=> true
 ```
 
@@ -319,6 +327,8 @@ foo.value
 #=> "Far"
 foo.type
 #=> :custom
+Clientele::HTTP::Header.response_names.include? 'Foo'
+#=> false
 
 boo = Clientele::HTTP::Header.for "Boo", "Bar", type: :response
 #=> #<Clientele::HTTP::Header:0x7fa5dac5e068 - Boo: Bar>
@@ -330,6 +340,8 @@ boo.value
 #=> "Bar"
 boo.type
 #=> :response
+Clientele::HTTP::Header.response_names.include? 'Boo'
+#=> false
 ```
 
 Custom concrete classes must be placed in the `Clientele::HTTP::Header` namespace and inherit from `Clientele::HTTP::Header::Concrete`:
@@ -392,24 +404,31 @@ headers.all
 #=> #<Clientele::HTTP::Header:0x7fee0baca4f8 - Accept-Language: en-US,en;q=0.8>...]
 ```
 
-You can manipulate your headers with `get` and `set`. Note that `set` will create a new `Headers` object entirely, since they're read-only.
+You can manipulate your headers with `include?`, `get` and `set`. Note that `set` will create a new `Headers` object entirely, since they're read-only.
 
 ```ruby
+headers.include? 'X-Custom-Header'
+#=> true
 headers.get('X-Custom-Header')
 #=> #<Clientele::HTTP::Header:0x7fc117002fc8 - X-Custom-Header: Foobar!>
 modified_headers = headers.set('X-Custom-Header', 'Fizzbuzz!')
+modified_headers = modified_headers.set('X-New-Header', 'Running low on sample names...')
 modified_headers.get('X-Custom-Header')
 #=> #<Clientele::HTTP::Header:0x7fc11243f348 - X-Custom-Header: Fizzbuzz!>
+modified_headers.get('X-New-Header')
+#=> #<Clientele::HTTP::Header:0x7fc3feb27a40 - X-New-Header: Running low on sample names...>
 headers.get('X-Custom-Header')
 #=> #<Clientele::HTTP::Header:0x7fc117002fc8 - X-Custom-Header: Foobar!>
+headers.get('X-New-Header')
+#=> nil
 ```
 
 A headers object also has some hash-like functionality:
 
 ```ruby
-headers['X-Custom-Header']
-#=> #<Clientele::HTTP::Header:0x7fc117002fc8 - X-Custom-Header: Foobar!>
 headers.has_key? 'X-Custom-Header'
+#=> true
+headers['X-Custom-Header']
 #=> #<Clientele::HTTP::Header:0x7fc117002fc8 - X-Custom-Header: Foobar!>
 headers.keys
 #=> ["Accept",
