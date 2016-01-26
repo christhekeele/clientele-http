@@ -17,6 +17,58 @@ end
 
 namespace :generate do
 
+  desc "Generates classes for standard HTTP verbs"
+  task :verbs do
+
+    class String
+      def unindent
+        indent = min = scan(/^[ \t]*(?=\S)/).min.size rescue 0
+        gsub(/^[ \t]{#{indent}}/, '')
+      end
+    end
+
+    verb_info = {
+      head:    [true, true],
+      get:     [true, true],
+      post:    [true, true],
+      put:     [true, true],
+      delete:  [true, true],
+      patch:   [true, true],
+      connect: [true, true],
+      options: [true, true],
+    }
+
+    verbs = "clientele/http/verbs"
+    mkdir_p verbs
+    open('lib/' + verbs + ".rb", "w") do |registry|
+      registry.puts "require 'clientele/http/verb'", ""
+      verb_info.sort.each do |method, (request_body, response_body)|
+        verb_file = verbs + "/#{method}"
+        open('lib/' + verb_file + ".rb", "w") do |verb|
+          registry.puts "require '#{verb_file}'"
+          verb.write <<-CODE.unindent
+            require "clientele/http/verb"
+
+            module Clientele
+              module HTTP
+                class Verb
+                  class #{method.capitalize} < Concrete
+
+                    @method        = :#{method.upcase}
+                    @request_body  = #{request_body ? "true" : "false"}
+                    @response_body = #{response_body ? "true" : "false"}
+
+                  end
+                end
+              end
+            end
+          CODE
+        end
+      end
+    end
+
+  end
+
   desc "Generates classes for standard HTTP statuses"
   task :statuses do
 
@@ -118,9 +170,10 @@ namespace :generate do
     statuses = "clientele/http/statuses"
     mkdir_p statuses
     open('lib/' + statuses + ".rb", "w") do |registry|
+      registry.puts "require 'clientele/http/status'", ""
       status_info.sort.each do |code, description|
-        status_file = statuses + "/#{code}-#{description.gsub("'", "").downcase.split(/\W+/).join('_')}.rb"
-        open('lib/' + status_file, "w") do |status|
+        status_file = statuses + "/#{code}-#{description.gsub("'", "").downcase.split(/\W+/).join('_')}"
+        open('lib/' + status_file + ".rb", "w") do |status|
           registry.puts "require '#{status_file}'"
           status.write <<-CODE.unindent
             require "clientele/http/status"
@@ -261,9 +314,10 @@ namespace :generate do
       types = "clientele/http/#{type}/headers"
       mkdir_p "lib/" + types
       open('lib/' + types + '.rb', "w") do |type_file|
+        type_file.puts "require 'clientele/http/header'", ""
         names.sort.each do |name|
-          header_file = types + "/#{name.gsub("-", "_").downcase}.rb"
-          open('lib/' + header_file, "w") do |header|
+          header_file = types + "/#{name.gsub("-", "_").downcase}"
+          open('lib/' + header_file + ".rb", "w") do |header|
             type_file.puts "require '#{header_file}'"
             header.write <<-CODE.unindent
               require "clientele/http/header"

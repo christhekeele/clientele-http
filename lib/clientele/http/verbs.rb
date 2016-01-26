@@ -1,5 +1,10 @@
-module Clientele
-  module HTTP
-    VERBS = Set.new(%i[head get post put delete patch connect options]).freeze
-  end
-end
+require 'clientele/http/verb'
+
+require 'clientele/http/verbs/connect'
+require 'clientele/http/verbs/delete'
+require 'clientele/http/verbs/get'
+require 'clientele/http/verbs/head'
+require 'clientele/http/verbs/options'
+require 'clientele/http/verbs/patch'
+require 'clientele/http/verbs/post'
+require 'clientele/http/verbs/put'

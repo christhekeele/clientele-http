@@ -4,6 +4,60 @@ module Clientele
   module HTTP
     class Header
 
+      class << self
+
+        attr_reader :name, :value, :type
+
+        def for(name, value, type: nil)
+          if names.include? name
+            concrete.find do |status|
+              status.name == name
+            end.new(value)
+          else
+            Generic.new(name, value, type: type)
+          end
+        end
+
+        def types
+          concrete
+        end
+
+        def names
+          concrete.map(&:name)
+        end
+
+        def request_types
+          concrete.select do |header|
+            header.type == :request
+          end
+        end
+
+        def request_names
+          request_types.map(&:name)
+        end
+
+        def response_types
+          concrete.select do |header|
+            header.type == :response
+          end
+        end
+
+        def response_names
+          response_types.map(&:name)
+        end
+
+      private
+
+        def concrete
+          constants.map do |name|
+            const_get name
+          end.select do |constant|
+            constant.ancestors.include?(Concrete) and constant.class != Module and constant != Concrete
+          end
+        end
+
+      end
+
       class Concrete < self
         extend Forwardable
 
@@ -21,40 +75,19 @@ module Clientele
 
       class Generic < self
 
-        attr_reader :name, :value
-        def initialize(name, value: nil)
+        attr_reader :name, :value, :type
+        def initialize(name, value, type: nil)
           @name = name.to_s
           @value = value.to_s
+          @type = type.to_sym or :custom
         end
 
       end
 
-      class << self
-
-        attr_reader :name, :value
-
-        def for(name, value: nil)
-          if names.include? name
-            concrete.find do |status|
-              status.name == name
-            end.new(value)
-          else
-            Generic.new(name, value: value)
-          end
-        end
-
-        def names
-          concrete.map(&:name)
-        end
-
-        def concrete
-          constants.map do |name|
-            const_get name
-          end.select do |constant|
-            constant.ancestors.include?(Header::Concrete) and constant.class != Module
-          end
-        end
-
+      def == other
+        if other.kind_of? Clientele::HTTP::Header
+          name == other.name and value == other.value
+        else; super; end
       end
 
       def to_s
@@ -68,6 +101,3 @@ module Clientele
     end
   end
 end
-
-require 'clientele/http/request/headers'
-require 'clientele/http/response/headers'
