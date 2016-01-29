@@ -9,9 +9,9 @@ module Clientele
         attr_reader :name, :value, :type
 
         def for(name, value, type: nil)
-          if names.include? name
+          if names.map(&:downcase).include? name.downcase
             concrete.find do |status|
-              status.name == name
+              status.name.downcase == name.downcase
             end.new(value)
           else
             Generic.new(name, value, type: type)
@@ -79,7 +79,7 @@ module Clientele
         def initialize(name, value, type: nil)
           @name = name.to_s
           @value = value.to_s
-          @type = type.to_sym or :custom
+          @type = type ? type.to_sym : :custom
         end
 
       end

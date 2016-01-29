@@ -3,7 +3,7 @@ require "clientele/http/header"
 module Clientele
   module HTTP
     class Header
-      class DNT < Concrete
+      class Dnt < Concrete
 
         @name = "DNT"
         @type = :request

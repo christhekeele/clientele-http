@@ -325,7 +325,7 @@ namespace :generate do
               module Clientele
                 module HTTP
                   class Header
-                    class #{name.gsub("-", "")} < Concrete
+                    class #{name.split('-').map(&:downcase).map(&:capitalize).join} < Concrete
 
                       @name = "#{name}"
                       @type = :#{type}

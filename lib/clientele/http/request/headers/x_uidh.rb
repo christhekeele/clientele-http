@@ -3,7 +3,7 @@ require "clientele/http/header"
 module Clientele
   module HTTP
     class Header
-      class XUIDH < Concrete
+      class XUidh < Concrete
 
         @name = "X-UIDH"
         @type = :request

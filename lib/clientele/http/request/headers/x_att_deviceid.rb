@@ -3,7 +3,7 @@ require "clientele/http/header"
 module Clientele
   module HTTP
     class Header
-      class XATTDeviceId < Concrete
+      class XAttDeviceid < Concrete
 
         @name = "X-ATT-DeviceId"
         @type = :request

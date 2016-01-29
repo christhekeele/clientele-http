@@ -3,7 +3,7 @@ require "clientele/http/header"
 module Clientele
   module HTTP
     class Header
-      class TE < Concrete
+      class Te < Concrete
 
         @name = "TE"
         @type = :request

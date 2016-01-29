@@ -3,7 +3,7 @@ require "clientele/http/header"
 module Clientele
   module HTTP
     class Header
-      class XXSSProtection < Concrete
+      class XXssProtection < Concrete
 
         @name = "X-XSS-Protection"
         @type = :response
