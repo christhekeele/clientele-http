@@ -3,10 +3,10 @@ require "clientele/http/verb"
 module Clientele
   module HTTP
     class Verb
-      class Connect < Concrete
+      class Trace < Concrete
 
-        @method        = :CONNECT
-        @request_body  = true
+        @method        = :TRACE
+        @request_body  = false
         @response_body = true
 
       end

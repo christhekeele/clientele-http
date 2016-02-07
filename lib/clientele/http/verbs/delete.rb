@@ -6,7 +6,7 @@ module Clientele
       class Delete < Concrete
 
         @method        = :DELETE
-        @request_body  = true
+        @request_body  = false
         @response_body = true
 
       end

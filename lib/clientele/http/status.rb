@@ -1,14 +1,21 @@
 require 'singleton'
 require 'forwardable'
 
+require 'clientele/http/statuses'
+require 'clientele/http/utils'
+require 'clientele/http/exception'
+
 module Clientele
   module HTTP
     class Status
 
+      include Utils::DeepCopy
+      include Utils::DeepFreeze
+
       class << self
 
         def for(code, description: nil)
-          if codes.include? code
+          if codes.include? code.to_i
             concrete.find do |status|
               status.code == code.to_i
             end.instance
@@ -46,6 +53,7 @@ module Clientele
         end
 
         def_delegators :"self.class", :code, :description
+
       end
 
       class Generic < self
@@ -54,6 +62,40 @@ module Clientele
         def initialize(code, description: nil)
           @code = code.to_i
           @description = description || "Non-standard HTTP Status"
+        end
+
+      ####
+      # DUPLICATION
+      ##
+
+      private
+
+        def initialize_copy(original)
+          super
+          instance_variables.each do |var|
+            original_var = original.instance_variable_get(var)
+            instance_variable_set var, original_var.clone if cloneable? original_var
+          end
+        end
+
+        def cloneable?(object)
+          case object
+          when NilClass, TrueClass, FalseClass, Symbol, Singleton
+            false
+          else; true; end
+        end
+
+      end
+
+      class Error < Clientele::HTTP::Exception
+
+        attr_reader :status
+        def initialize(status)
+          @status = status
+        end
+
+        def to_s
+          "#{status.code}: #{status.description}"
         end
 
       end
@@ -86,6 +128,10 @@ module Clientele
       # Contains a client or server error
       def error?
         code > 399 && code < 600
+      end
+
+      def error
+        Error.new self
       end
 
       def valid?

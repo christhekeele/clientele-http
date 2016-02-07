@@ -1,8 +1,14 @@
 require 'forwardable'
 
+require 'clientele/http/headers'
+require 'clientele/http/utils'
+
 module Clientele
   module HTTP
     class Header
+
+      include Utils::DeepCopy
+      include Utils::DeepFreeze
 
       class << self
 

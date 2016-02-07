@@ -1,9 +1,15 @@
 require 'singleton'
 require 'forwardable'
 
+require 'clientele/http/verbs'
+require 'clientele/http/utils'
+
 module Clientele
   module HTTP
     class Verb
+
+      include Utils::DeepCopy
+      include Utils::DeepFreeze
 
       class << self
 
@@ -66,6 +72,27 @@ module Clientele
 
         def has_response_body?
           !! @response_body
+        end
+
+      ####
+      # DUPLICATION
+      ##
+
+      private
+
+        def initialize_copy(original)
+          super
+          instance_variables.each do |var|
+            original_var = original.instance_variable_get(var)
+            instance_variable_set var, original_var.clone if cloneable? original_var
+          end
+        end
+
+        def cloneable?(object)
+          case object
+          when NilClass, TrueClass, FalseClass, Symbol, Singleton
+            false
+          else; true; end
         end
 
       end

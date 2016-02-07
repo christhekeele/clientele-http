@@ -6,10 +6,10 @@ module Clientele
   end
 end
 
+require 'clientele/http/exception'
 require 'clientele/http/verbs'
 require 'clientele/http/statuses'
 require 'clientele/http/headers'
 require 'clientele/http/uri'
-# - `Clientele::HTTP::Body`
 require 'clientele/http/request'
 require 'clientele/http/response'

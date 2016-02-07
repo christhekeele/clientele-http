@@ -22,27 +22,37 @@ namespace :generate do
 
     class String
       def unindent
-        indent = min = scan(/^[ \t]*(?=\S)/).min.size rescue 0
+        indent = scan(/^[ \t]*(?=\S)/).min.size rescue 0
         gsub(/^[ \t]{#{indent}}/, '')
       end
     end
 
-    verb_info = {
-      head:    [true, true],
-      get:     [true, true],
-      post:    [true, true],
-      put:     [true, true],
-      delete:  [true, true],
-      patch:   [true, true],
-      connect: [true, true],
-      options: [true, true],
-    }
+    require 'net/http'
+
+    verbs_info = [
+      # Net::HTTP::Copy,
+      Net::HTTP::Delete,
+      Net::HTTP::Get,
+      Net::HTTP::Head,
+      # Net::HTTP::Lock,
+      # Net::HTTP::Mkcol,
+      # Net::HTTP::Move,
+      Net::HTTP::Options,
+      Net::HTTP::Patch,
+      Net::HTTP::Post,
+      # Net::HTTP::Propfind,
+      # Net::HTTP::Proppatch,
+      Net::HTTP::Put,
+      Net::HTTP::Trace,
+      # Net::HTTP::Unlock,
+    ]
 
     verbs = "clientele/http/verbs"
-    mkdir_p verbs
+    mkdir_p 'lib/' + verbs
     open('lib/' + verbs + ".rb", "w") do |registry|
       registry.puts "require 'clientele/http/verb'", ""
-      verb_info.sort.each do |method, (request_body, response_body)|
+      verbs_info.sort_by{ |i| i.const_get :METHOD }.each do |verb_info|
+        method = verb_info.const_get(:METHOD).downcase
         verb_file = verbs + "/#{method}"
         open('lib/' + verb_file + ".rb", "w") do |verb|
           registry.puts "require '#{verb_file}'"
@@ -55,8 +65,8 @@ namespace :generate do
                   class #{method.capitalize} < Concrete
 
                     @method        = :#{method.upcase}
-                    @request_body  = #{request_body ? "true" : "false"}
-                    @response_body = #{response_body ? "true" : "false"}
+                    @request_body  = #{verb_info.const_get(:REQUEST_HAS_BODY) ? "true" : "false"}
+                    @response_body = #{verb_info.const_get(:RESPONSE_HAS_BODY) ? "true" : "false"}
 
                   end
                 end
@@ -74,7 +84,7 @@ namespace :generate do
 
     class String
       def unindent
-        indent = min = scan(/^[ \t]*(?=\S)/).min.size rescue 0
+        indent = scan(/^[ \t]*(?=\S)/).min.size rescue 0
         gsub(/^[ \t]{#{indent}}/, '')
       end
     end
@@ -168,7 +178,7 @@ namespace :generate do
     }
 
     statuses = "clientele/http/statuses"
-    mkdir_p statuses
+    mkdir_p 'lib/' + statuses
     open('lib/' + statuses + ".rb", "w") do |registry|
       registry.puts "require 'clientele/http/status'", ""
       status_info.sort.each do |code, description|
@@ -202,7 +212,7 @@ namespace :generate do
 
     class String
       def unindent
-        indent = min = scan(/^[ \t]*(?=\S)/).min.size rescue 0
+        indent = scan(/^[ \t]*(?=\S)/).min.size rescue 0
         gsub(/^[ \t]{#{indent}}/, '')
       end
     end
@@ -312,9 +322,9 @@ namespace :generate do
 
     header_info.each do |type, names|
       types = "clientele/http/#{type}/headers"
-      mkdir_p "lib/" + types
+      mkdir_p 'lib/' +  types
       open('lib/' + types + '.rb', "w") do |type_file|
-        type_file.puts "require 'clientele/http/header'", ""
+        type_file.puts "require 'clientele/http/header'", "require 'clientele/http/headers'", ""
         names.sort.each do |name|
           header_file = types + "/#{name.gsub("-", "_").downcase}"
           open('lib/' + header_file + ".rb", "w") do |header|

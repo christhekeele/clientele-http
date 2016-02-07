@@ -6,7 +6,7 @@ module Clientele
       class Get < Concrete
 
         @method        = :GET
-        @request_body  = true
+        @request_body  = false
         @response_body = true
 
       end

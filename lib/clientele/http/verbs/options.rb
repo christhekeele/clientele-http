@@ -6,8 +6,8 @@ module Clientele
       class Options < Concrete
 
         @method        = :OPTIONS
-        @request_body  = true
-        @response_body = true
+        @request_body  = false
+        @response_body = false
 
       end
     end

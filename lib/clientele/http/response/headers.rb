@@ -1,4 +1,5 @@
 require 'clientele/http/header'
+require 'clientele/http/headers'
 
 require 'clientele/http/response/headers/accept_patch'
 require 'clientele/http/response/headers/accept_ranges'

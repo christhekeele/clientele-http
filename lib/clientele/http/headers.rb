@@ -1,5 +1,6 @@
 require 'clientele/http/header'
 
+require 'clientele/http/utils'
 require 'clientele/http/request/headers'
 require 'clientele/http/response/headers'
 
@@ -8,6 +9,8 @@ module Clientele
     class Headers
 
       include Enumerable
+      include Utils::DeepCopy
+      include Utils::DeepFreeze
 
       def initialize(hash = {}, type: nil)
         @type = type
@@ -30,6 +33,10 @@ module Clientele
         end
       end
       alias_method :has_key?, :include?
+
+      def empty?
+        @values.empty?
+      end
 
       def keys
         @values.map(&:name)
@@ -92,8 +99,8 @@ module Clientele
         ].join
       end
 
-      def respond_to_missing?(method_name)
-        include? to_key(method_name)
+      def respond_to_missing?(method_name, private = false)
+        include? to_key(method_name) || super(method_name, private)
       end
 
       def method_missing(method_name, *args, &block)

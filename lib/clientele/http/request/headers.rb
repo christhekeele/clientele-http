@@ -1,4 +1,5 @@
 require 'clientele/http/header'
+require 'clientele/http/headers'
 
 require 'clientele/http/request/headers/accept'
 require 'clientele/http/request/headers/accept_charset'
